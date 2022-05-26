@@ -1,0 +1,5 @@
+<RCC>
+  <qresource prefix="svgviewer">
+      <file alias="cubic.svg">cubic.svg</file>
+  </qresource>
+</RCC>

@@ -1,24 +1,32 @@
-# Generated from qtsvg.pro.
-
 cmake_minimum_required(VERSION 3.16)
+project(svgviewer LANGUAGES CXX)
 
-include(.cmake.conf)
-project(QtSvg
-    VERSION "${QT_REPO_MODULE_VERSION}"
-    DESCRIPTION "Qt SVG Libraries" # special case
-    HOMEPAGE_URL "https://qt.io/"
-    LANGUAGES CXX C
-)
+set(CMAKE_AUTOMOC ON)
+set(CMAKE_AUTOUIC ON)
+set(CMAKE_AUTORCC ON)
 
-find_package(Qt6 ${PROJECT_VERSION} CONFIG REQUIRED COMPONENTS BuildInternals Core) # special case
-find_package(Qt6 ${PROJECT_VERSION} QUIET CONFIG OPTIONAL_COMPONENTS Gui Widgets Xml) # special case
+find_package(Qt6 REQUIRED COMPONENTS Core Gui Svg SvgWidgets Widgets)
 
-# Needed for examples to configure properly when not using ExternalProject and when
-# Qt is configured with a bundled zlib.
-# Otherwise Qt6SvgDependencies will claim Qt6ZlibPrivate_FOUND is FALSE because we
-# set QT_NO_CREATE_TARGETS to TRUE when building examples in-tree.
-if(NOT QT_FEATURE_system_zlib)
-    find_package(Qt6 ${PROJECT_VERSION} QUIET CONFIG OPTIONAL_COMPONENTS ZlibPrivate)
+add_executable(${PROJECT_NAME} src/main.cpp
+    src/exportdialog.cpp include/exportdialog.h
+    src/mainwindow.cpp include/mainwindow.h
+    src/svgview.cpp include/svgview.h
+    res/bubbles.qrc res/cubic.qrc res/spheres.qrc)
+target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
+
+set_target_properties(${PROJECT_NAME} PROPERTIES
+    WIN32_EXECUTABLE FALSE
+    MACOSX_BUNDLE TRUE)
+
+target_link_libraries(${PROJECT_NAME} PUBLIC
+    Qt::Core
+    Qt::Gui
+    Qt::Svg
+    Qt::SvgWidgets
+    Qt::Widgets)
+
+if (TARGET Qt::OpenGL AND TARGET Qt::OpenGLWidgets)
+    target_compile_definitions(${PROJECT_NAME} PUBLIC USE_OPENGLWIDGETS)
+    target_link_libraries(${PROJECT_NAME} PUBLIC Qt::OpenGL Qt::OpenGLWidgets)
 endif()
 
-qt_build_repo()
